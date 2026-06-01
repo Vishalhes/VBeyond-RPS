@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VBeyond · Recruiter Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060B17;--bg2:#0A1120;--bg3:#0F1929;--bg4:#132030;
+  --border:#182438;--bord2:#1F3050;
+  --blue:#0A66C2;--blue2:#1478D4;--blue3:#3B9EF7;
+  --cyan:#22D3EE;--green:#10B981;--amber:#F59E0B;
+  --red:#EF4444;--violet:#7C3AED;
+  --gold:#F5C842;--silver:#A8B8CC;--bronze:#CD7F32;
+  --text:#DDE8F8;--text2:#7A96B8;--text3:#3A5270;--card:#0C1523;
+}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bord2);border-radius:3px}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.login-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 15% 50%,rgba(10,102,194,.10) 0%,transparent 65%),radial-gradient(ellipse 50% 70% at 85% 30%,rgba(34,211,238,.05) 0%,transparent 65%),var(--bg)}
+.login-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:52px 52px;opacity:.35;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%)}
+.login-card{position:relative;z-index:2;background:var(--card);border:1px solid var(--bord2);border-radius:20px;padding:44px 40px 40px;width:420px;box-shadow:0 0 0 1px rgba(255,255,255,.03),0 30px 70px rgba(0,0,0,.6);animation:fadeUp .55s cubic-bezier(.22,1,.36,1)}
+.login-top-line{position:absolute;top:0;left:24px;right:24px;height:2px;background:linear-gradient(90deg,transparent,var(--blue),var(--cyan),transparent);border-radius:0 0 2px 2px}
+.brand-row{display:flex;align-items:center;gap:13px;margin-bottom:34px}
+.brand-mark{width:42px;height:42px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;box-shadow:0 4px 16px rgba(10,102,194,.4)}
+.brand-name{font-family:'Syne',sans-serif;font-weight:700;font-size:19px;color:var(--text);line-height:1.1}
+.brand-sub{font-size:10px;color:var(--text2);font-weight:300;letter-spacing:.07em;margin-top:2px}
+.login-h{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--text);margin-bottom:5px}
+.login-p{font-size:12px;color:var(--text2);font-weight:300;margin-bottom:30px;line-height:1.5}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);margin-bottom:7px}
+.field input{width:100%;background:var(--bg3);border:1px solid var(--bord2);border-radius:10px;padding:12px 15px;font-family:'DM Mono',monospace;font-size:13.5px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(10,102,194,.14)}
+.field input::placeholder{color:var(--text3)}
+.btn-primary{width:100%;background:var(--blue);border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:background .2s,box-shadow .2s;margin-top:6px}
+.btn-primary:hover{background:var(--blue2);box-shadow:0 6px 20px rgba(10,102,194,.35)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.login-error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#FCA5A5;border-radius:8px;padding:10px 14px;font-size:12px;margin-top:14px;display:none}
+
+/* ── NAVBAR ── */
+#dashboard-screen{display:none;min-height:100vh}
+.navbar{height:58px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:200}
+.nav-brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-mark{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:#fff}
+.nav-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text)}
+.nav-sep{width:1px;height:18px;background:var(--bord2)}
+.nav-label{font-size:11px;color:var(--text2);font-weight:300;letter-spacing:.04em;white-space:nowrap}
+.nav-spacer{flex:1}
+.live-dot{display:inline-flex;align-items:center;gap:7px;background:rgba(10,102,194,.1);border:1px solid rgba(10,102,194,.2);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--blue3)}
+.live-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue3);animation:pulse 2s ease-in-out infinite}
+.nav-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+.nav-uinfo{line-height:1.25}
+.nav-uname{font-size:12px;font-weight:500;color:var(--text)}
+.nav-urole{font-size:10px;color:var(--text2);font-weight:300}
+.btn-logout{background:none;border:1px solid var(--bord2);border-radius:7px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);cursor:pointer;transition:all .2s}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+/* ── TABS ── */
+.tab-bar{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:2px;position:sticky;top:58px;z-index:190}
+.tab-btn{display:flex;align-items:center;gap:8px;padding:14px 22px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text2);background:none;border:none;cursor:pointer;position:relative;transition:color .2s;letter-spacing:.03em;white-space:nowrap}
+.tab-btn::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;transform:scaleX(0);transition:transform .22s;border-radius:2px 2px 0 0}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--text)}
+.tab-btn.active::after{transform:scaleX(1)}
+#tab-team.active::after{background:var(--blue)}
+#tab-lead.active::after{background:var(--green)}
+#tab-recruiter.active::after{background:var(--amber)}
+.tab-dot{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.td1{background:rgba(10,102,194,.18);color:var(--blue3)}
+.td2{background:rgba(16,185,129,.15);color:#34D399}
+.td3{background:rgba(245,158,11,.15);color:#FCD34D}
+
+/* ── MAIN LAYOUT ── */
+.main{padding:22px 28px 40px;max-width:1680px;margin:0 auto}
+.filter-wrap{padding:18px 28px 0;max-width:1680px;margin:0 auto}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+.filter-lbl{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text2)}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{padding:4px 13px;border-radius:20px;border:1px solid var(--bord2);background:transparent;font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);cursor:pointer;transition:all .18s}
+.chip:hover{border-color:var(--blue);color:var(--blue3);background:rgba(10,102,194,.07)}
+.chip.active{background:rgba(10,102,194,.14);border-color:var(--blue);color:var(--blue3)}
+.chip.all.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.filter-spacer{flex:1}
+.btn-export{display:flex;align-items:center;gap:7px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);border-radius:8px;padding:6px 16px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:#34D399;cursor:pointer;transition:all .2s}
+.btn-export:hover{background:rgba(16,185,129,.14);border-color:rgba(16,185,129,.4)}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:13px}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px 20px 16px;position:relative;overflow:hidden;cursor:default;transition:border-color .2s,transform .22s,box-shadow .22s}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:13px 13px 0 0;opacity:.85}
+.kpi.c-blue::after{background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.kpi.c-cyan::after{background:linear-gradient(90deg,var(--cyan),#A5F3FC)}
+.kpi.c-green::after{background:linear-gradient(90deg,var(--green),#6EE7B7)}
+.kpi.c-amber::after{background:linear-gradient(90deg,var(--amber),#FDE68A)}
+.kpi.c-violet::after{background:linear-gradient(90deg,var(--violet),#C4B5FD)}
+.kpi.c-red::after{background:linear-gradient(90deg,var(--red),#FCA5A5)}
+.kpi:hover{border-color:var(--bord2);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.3)}
+.kpi-lbl{font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--text2);margin-bottom:11px}
+.kpi-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--text);line-height:1;margin-bottom:5px;animation:countIn .4s ease both}
+.kpi-sub{font-size:10px;color:var(--text3);font-weight:300}
+.kpi-icon{position:absolute;bottom:8px;right:14px;font-size:28px;opacity:.06;pointer-events:none;user-select:none}
+
+/* ── CHARTS ── */
+.chart-row{display:grid;gap:16px;margin-bottom:16px}
+.col2{grid-template-columns:1fr 1fr}
+.col1{grid-template-columns:1fr}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:22px 24px}
+.chart-head{margin-bottom:16px}
+.chart-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.chart-sub{font-size:10px;color:var(--text2);font-weight:300}
+.chart-wrap{position:relative}
+.h280{height:280px}.h350{height:350px}.h260{height:260px}.h300{height:300px}
+
+/* ── TABLE ── */
+.tbl-card{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:4px}
+.tbl-head{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.tbl-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text)}
+.tbl-count{font-size:11px;color:var(--text2)}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--bg3);padding:9px 14px;text-align:left;font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);white-space:nowrap;border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .14s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(15,25,41,.8)}
+tbody td{padding:10px 14px;font-size:12px;color:var(--text);white-space:nowrap}
+.mono{font-family:'DM Mono',monospace}
+.badge-team{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:500;background:rgba(10,102,194,.1);color:var(--blue3);border:1px solid rgba(10,102,194,.18)}
+.r-hi{color:#34D399}.r-mid{color:var(--amber)}.r-lo{color:#F87171}
+
+/* ── RANK TABLES ── */
+.rank-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.rank-card{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden}
+.rank-card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.rank-card-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.badge-top{background:rgba(16,185,129,.12);color:#34D399;border:1px solid rgba(16,185,129,.2);border-radius:4px;padding:2px 7px;font-size:9px;font-weight:600;letter-spacing:.05em}
+.badge-bot{background:rgba(239,68,68,.1);color:#F87171;border:1px solid rgba(239,68,68,.2);border-radius:4px;padding:2px 7px;font-size:9px;font-weight:600;letter-spacing:.05em}
+.rank-sub-lbl{font-size:10px;color:var(--text2)}
+
+.rank-item{display:grid;grid-template-columns:34px 1fr auto 72px;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);transition:background .14s}
+.rank-item:last-child{border-bottom:none}
+.rank-item:hover{background:var(--bg3)}
+
+.rb{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;flex-shrink:0}
+.rb-1{background:rgba(245,200,66,.14);color:var(--gold);border:1px solid rgba(245,200,66,.28)}
+.rb-2{background:rgba(168,184,204,.1);color:var(--silver);border:1px solid rgba(168,184,204,.22)}
+.rb-3{background:rgba(205,127,50,.12);color:var(--bronze);border:1px solid rgba(205,127,50,.25)}
+.rb-n{background:rgba(10,102,194,.1);color:var(--blue3);border:1px solid rgba(10,102,194,.2)}
+.rb-b{background:rgba(239,68,68,.08);color:#F87171;border:1px solid rgba(239,68,68,.18)}
+
+.rank-info{min-width:0}
+.rank-name{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-meta{font-size:10px;color:var(--text2);font-weight:300;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-val{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);text-align:right;white-space:nowrap}
+.bar-wrap{background:var(--bg3);border-radius:3px;height:4px;overflow:hidden}
+.bar-top{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:3px;transition:width .5s ease}
+.bar-bot{height:100%;background:linear-gradient(90deg,var(--red),#FCA5A5);border-radius:3px;transition:width .5s ease}
+
+/* ── LOADING ── */
+#dash-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(100vh - 116px);gap:14px}
+.spinner{width:34px;height:34px;border:3px solid var(--bord2);border-top-color:var(--blue);border-radius:50%;animation:spin .75s linear infinite}
+.loading-text{font-size:12px;color:var(--text2);font-weight:300}
+.no-data{padding:40px;text-align:center;color:var(--text2);font-size:12px}
+
+/* ── KEYFRAMES ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes countIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1280px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.col2{grid-template-columns:1fr}}
+@media(max-width:900px){.rank-row{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.main,.filter-wrap{padding-left:14px;padding-right:14px}.nav-label,.nav-sep,.nav-uinfo{display:none}.tab-btn{padding:12px 12px;font-size:11px}}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-screen">
+  <div class="login-bg"></div><div class="login-grid"></div>
+  <div class="login-card">
+    <div class="login-top-line"></div>
+    <div class="brand-row">
+      <div class="brand-mark">VB</div>
+      <div><div class="brand-name">VBeyond</div><div class="brand-sub">LinkedIn Recruiter Intelligence</div></div>
+    </div>
+    <h2 class="login-h">Welcome back</h2>
+    <p class="login-p">Sign in to access recruiter analytics &amp; performance</p>
+    <div class="field"><label>Email Address</label><input id="inp-email" type="email" placeholder="you@vbeyond.com" autocomplete="email"></div>
+    <div class="field"><label>Password</label><input id="inp-pass" type="password" placeholder="••••••••••" autocomplete="current-password"></div>
+    <button class="btn-primary" id="btn-login" onclick="handleLogin()">Sign In &nbsp;→</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="dashboard-screen">
+
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-mark">VB</div><span class="nav-name">VBeyond</span></div>
+    <div class="nav-sep"></div>
+    <span class="nav-label">LinkedIn Recruiter Intelligence</span>
+    <div class="nav-spacer"></div>
+    <span class="live-dot">Live Dashboard</span>
+    <div class="nav-avatar" id="nav-avatar">VB</div>
+    <div class="nav-uinfo"><div class="nav-uname" id="nav-uname">—</div><div class="nav-urole">VBeyond User</div></div>
+    <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+  </nav>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-team" onclick="switchPage('team')"><span class="tab-dot td1">T</span>Teams</button>
+    <button class="tab-btn" id="tab-lead" onclick="switchPage('lead')"><span class="tab-dot td2">L</span>Leads</button>
+    <button class="tab-btn" id="tab-recruiter" onclick="switchPage('recruiter')"><span class="tab-dot td3">R</span>Recruiters</button>
+  </div>
+
+  <div id="dash-loading"><div class="spinner"></div><span class="loading-text">Loading data…</span></div>
+
+  <div id="dash-body" style="display:none">
+
+    <!-- Shared Filter -->
+    <div class="filter-wrap">
+      <div class="filter-bar">
+        <span class="filter-lbl">Month</span>
+        <div class="chips" id="month-chips"></div>
+        <div class="filter-spacer"></div>
+        <button class="btn-export" onclick="exportCSV()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- ═ PAGE: TEAMS ═ -->
+    <div id="page-team" class="main">
+      <p class="sec-lbl">Team Performance Overview</p>
+      <div class="kpi-grid" id="team-kpis"></div>
+      <div class="chart-row col2">
+        <div class="chart-card">
+          <div class="chart-head"><div class="chart-title">InMails Sent by Team</div><div class="chart-sub">Total outreach volume per team</div></div>
+          <div class="chart-wrap h350"><canvas id="ch-t-inmail"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><div class="chart-title">Response Rate by Team</div><div class="chart-sub">Average InMail response rate (%)</div></div>
+          <div class="chart-wrap h350"><canvas id="ch-t-resp"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-row col1">
+        <div class="chart-card">
+          <div class="chart-head"><div class="chart-title">Profiles Viewed &amp; Searches by Team</div><div class="chart-sub">Research &amp; discovery activity</div></div>
+          <div class="chart-wrap h300"><canvas id="ch-t-act"></canvas></div>
+        </div>
+      </div>
+      <div class="tbl-card">
+        <div class="tbl-head"><div><div class="tbl-title">All Teams Summary</div><div class="tbl-count" id="team-count">—</div></div></div>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>Team</th><th>Recruiters</th><th>InMails Sent</th><th>Response Rate</th><th>Acceptance Rate</th><th>Active Days</th><th>Profiles Viewed</th><th>Searches</th><th>Jobs Posted</th></tr></thead>
+            <tbody id="team-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═ PAGE: LEADS ═ -->
+    <div id="page-lead" class="main" style="display:none">
+      <p class="sec-lbl">Lead Performance Overview</p>
+      <div class="kpi-grid" id="lead-kpis"></div>
+      <p class="sec-lbl">Top 10 &amp; Bottom 10 — Active Days</p>
+      <div class="rank-row">
+        <div class="rank-card">
+          <div class="rank-card-head"><span class="rank-card-title">🏆 Top 10 <span class="badge-top">HIGHEST</span></span><span class="rank-sub-lbl">Active Days</span></div>
+          <div id="rl-top-active"></div>
+        </div>
+        <div class="rank-card">
+          <div class="rank-card-head"><span class="rank-card-title">📉 Bottom 10 <span class="badge-bot">LOWEST</span></span><span class="rank-sub-lbl">Active Days</span></div>
+          <div id="rl-bot-active"></div>
+        </div>
+      </div>
+      <p class="sec-lbl">Top 10 &amp; Bottom 10 — Profiles Viewed</p>
+      <div class="rank-row">
+        <div class="rank-card">
+          <div class="rank-card-head"><span class="rank-card-title">🏆 Top 10 <span class="badge-top">HIGHEST</span></span><span class="rank-sub-lbl">Profiles Viewed</span></div>
+          <div id="rl-top-profiles"></div>
+        </div>
+        <div class="rank-card">
+          <div class="rank-card-head"><span class="rank-card-title">📉 Bottom 10 <span class="badge-bot">LOWEST</span></span><span class="rank-sub-lbl">Profiles Viewed</span></div>
+          <div id="rl-bot-profiles"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═ PAGE: RECRUITERS ═ -->
+    <div id="page-recruiter" class="main" style="display:none">
+      <p class="sec-lbl">Recruiter Performance Overview <span style="font-size:9px;color:var(--text3);font-weight:400;letter-spacing:.05em;text-transform:none">(Team Leads excluded from rankings)</span></p>
+      <div class="kpi-grid" id="rec-kpis"></div>
+      <p class="sec-lbl">Top 10 &amp; Bottom 10 — InMails Sent</p>
+      <div class="rank-row">
+        <div class="rank-card">
+          <div class="rank-card-head"><span class="rank-card-title">🏆 Top 10 <span class="badge-top">HIGHEST</span></span><span class="rank-sub-lbl">InMails Sent</span></div>
+          <div id="rr-top-inmail"></div>
+        </div>
+        <div class="rank-card">
+          <div class="rank-card-head"><span class="rank-card-title">📉 Bottom 10 <span class="badge-bot">LOWEST</span></span><span class="rank-sub-lbl">InMails Sent</span></div>
+          <div id="rr-bot-inmail"></div>
+        </div>
+      </div>
+      <p class="sec-lbl">Top 10 &amp; Bottom 10 — Acceptance Rate</p>
+      <div class="rank-row">
+        <div class="rank-card">
+          <div class="rank-card-head"><span class="rank-card-title">🏆 Top 10 <span class="badge-top">HIGHEST</span></span><span class="rank-sub-lbl">Acceptance Rate %</span></div>
+          <div id="rr-top-acc"></div>
+        </div>
+        <div class="rank-card">
+          <div class="rank-card-head"><span class="rank-card-title">📉 Bottom 10 <span class="badge-bot">LOWEST</span></span><span class="rank-sub-lbl">Acceptance Rate %</span></div>
+          <div id="rr-bot-acc"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dash-body -->
+</div><!-- /dashboard -->
+
+<script>
+const SUPA_URL='https://hgljfrmblmhpdwdqjrwo.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbGpmcm1ibG1ocGR3ZHFqcndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNjY5MDIsImV4cCI6MjA5NTY0MjkwMn0.q1t-lP7ZO5bJW54lb2qgN68qMFF2IjVbfUi7B__NPMU';
+const sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+const MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+let allData=[],filteredData=[],activeMonths=new Set(['ALL']),currentPage='team',charts={};
+
+/* ── AUTH ── */
+async function handleLogin(){
+  const email=document.getElementById('inp-email').value.trim();
+  const pass=document.getElementById('inp-pass').value;
+  const btn=document.getElementById('btn-login');
+  document.getElementById('login-error').style.display='none';
+  if(!email||!pass){showErr('Please enter email and password.');return;}
+  btn.textContent='Signing in…';btn.disabled=true;
+  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){showErr(error.message||'Login failed.');btn.textContent='Sign In →';btn.disabled=false;return;}
+  await boot(data.user);
+}
+async function handleLogout(){
+  await sb.auth.signOut();
+  Object.values(charts).forEach(c=>c?.destroy());charts={};
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('dashboard-screen').style.display='none';
+  document.getElementById('btn-login').textContent='Sign In →';
+  document.getElementById('btn-login').disabled=false;
+}
+function showErr(m){const e=document.getElementById('login-error');e.textContent=m;e.style.display='block';}
+
+/* ── BOOT ── */
+async function boot(user){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('dashboard-screen').style.display='block';
+  document.getElementById('dash-loading').style.display='flex';
+  document.getElementById('dash-body').style.display='none';
+  const name=user.email.split('@')[0];
+  document.getElementById('nav-avatar').textContent=name.slice(0,2).toUpperCase();
+  document.getElementById('nav-uname').textContent=user.email;
+  const{data,error}=await sb.from('team_lead_performance').select('*');
+  if(error){document.getElementById('dash-loading').innerHTML=`<div style="text-align:center;color:var(--text2)"><div style="font-size:28px;margin-bottom:10px">⚠️</div><div style="font-family:'Syne',sans-serif;font-size:15px;color:var(--text);margin-bottom:5px">Data load failed</div><div style="font-size:11px">${error.message}</div></div>`;return;}
+  allData=data||[];activeMonths=new Set(['ALL']);
+  buildChips();applyFilters();
+  document.getElementById('dash-loading').style.display='none';
+  document.getElementById('dash-body').style.display='block';
+}
+
+/* ── PAGE SWITCH ── */
+function switchPage(p){
+  currentPage=p;
+  ['team','lead','recruiter'].forEach(x=>{
+    document.getElementById(`page-${x}`).style.display=x===p?'block':'none';
+    document.getElementById(`tab-${x}`).classList.toggle('active',x===p);
+  });
+  renderPage();
+}
+
+/* ── FILTERS ── */
+function buildChips(){
+  const ms=[...new Set(allData.map(r=>r.month).filter(Boolean))].sort((a,b)=>MONTHS.indexOf(a)-MONTHS.indexOf(b));
+  const w=document.getElementById('month-chips');w.innerHTML='';
+  const a=document.createElement('button');a.className='chip all active';a.textContent='ALL';a.onclick=()=>toggle('ALL');w.appendChild(a);
+  ms.forEach(m=>{const c=document.createElement('button');c.className='chip';c.textContent=m;c.dataset.m=m;c.onclick=()=>toggle(m);w.appendChild(c);});
+}
+function toggle(m){
+  if(m==='ALL'){activeMonths=new Set(['ALL']);}
+  else{activeMonths.delete('ALL');activeMonths.has(m)?activeMonths.delete(m):activeMonths.add(m);if(!activeMonths.size)activeMonths=new Set(['ALL']);}
+  document.querySelectorAll('#month-chips .chip').forEach(c=>c.classList.toggle('active',activeMonths.has(c.dataset.m||'ALL')));
+  applyFilters();
+}
+function applyFilters(){
+  filteredData=activeMonths.has('ALL')?[...allData]:allData.filter(r=>activeMonths.has(r.month));
+  renderPage();
+}
+function renderPage(){
+  if(currentPage==='team')renderTeam();
+  else if(currentPage==='lead')renderLead();
+  else renderRecruiter();
+}
+
+/* ── HELPERS ── */
+const grp=(data,key)=>data.reduce((a,r)=>{const k=r[key]||'Unknown';if(!a[k])a[k]=[];a[k].push(r);return a;},{});
+const sumK=(arr,k)=>arr.reduce((a,r)=>a+(parseFloat(r[k])||0),0);
+const avgK=(arr,k)=>arr.length?sumK(arr,k)/arr.length:0;
+const rC=v=>v>=50?'r-hi':v>=25?'r-mid':'r-lo';
+
+function getTeamStats(){
+  return Object.entries(grp(filteredData,'team')).map(([team,rows])=>({
+    team,recruiters:new Set(rows.map(r=>r.seat_holder)).size,
+    inmails:sumK(rows,'inmails_sent'),resp:avgK(rows,'inmail_response_rate'),
+    acc:avgK(rows,'inmail_acceptance_rate'),active:sumK(rows,'active_days'),
+    profiles:sumK(rows,'profiles_viewed'),searches:sumK(rows,'searches_performed'),jobs:sumK(rows,'jobs_posted')
+  })).sort((a,b)=>b.inmails-a.inmails);
+}
+function getLeadStats(){
+  return Object.entries(grp(filteredData,'lead')).map(([lead,rows])=>({
+    lead,team:rows[0]?.team||'—',active:sumK(rows,'active_days'),profiles:sumK(rows,'profiles_viewed'),
+    inmails:sumK(rows,'inmails_sent'),acc:avgK(rows,'inmail_acceptance_rate'),resp:avgK(rows,'inmail_response_rate')
+  }));
+}
+function getRecStats(){
+  const leadNames=new Set(filteredData.map(r=>r.lead).filter(Boolean));
+  return Object.entries(grp(filteredData,'seat_holder'))
+    .filter(([n])=>!leadNames.has(n))
+    .map(([name,rows])=>({
+      name,team:rows[0]?.team||'—',lead:rows[0]?.lead||'—',
+      inmails:sumK(rows,'inmails_sent'),acc:avgK(rows,'inmail_acceptance_rate'),
+      resp:avgK(rows,'inmail_response_rate'),active:sumK(rows,'active_days'),profiles:sumK(rows,'profiles_viewed')
+    }));
+}
+
+/* ── KPI RENDER ── */
+function renderKPIs(id,cards){
+  document.getElementById(id).innerHTML=cards.map((c,i)=>`
+    <div class="kpi ${c.color}">
+      <div class="kpi-lbl">${c.label}</div>
+      <div class="kpi-val" style="animation-delay:${i*.06}s">${c.val}</div>
+      <div class="kpi-sub">${c.sub}</div>
+      <div class="kpi-icon">${c.icon}</div>
+    </div>`).join('');
+}
+
+/* ── CHART HELPERS ── */
+const CF={family:'DM Mono',size:10.5},CG={color:'rgba(24,36,56,.9)',drawBorder:false},CT='#3A5270',CL='#7A96B8';
+function killChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function horizBar(id,labels,datasets){
+  killChart(id);
+  charts[id]=new Chart(document.getElementById(id),{
+    type:'bar',
+    data:{labels,datasets:datasets.map(d=>({label:d.label,data:d.data,backgroundColor:d.bg,borderColor:d.bc,borderWidth:1,borderRadius:4,borderSkipped:false}))},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:CL,font:CF,boxWidth:10,padding:14}},tooltip:{mode:'index',intersect:false}},
+      scales:{x:{ticks:{color:CT,font:CF},grid:CG,beginAtZero:true},y:{ticks:{color:CT,font:CF,maxRotation:0},grid:CG}}}
+  });
+}
+
+/* ── PAGE: TEAM ── */
+function renderTeam(){
+  const s=getTeamStats();const n=s.length;
+  const totInm=s.reduce((a,x)=>a+x.inmails,0);
+  const avgResp=n?s.reduce((a,x)=>a+x.resp,0)/n:0;
+  const totProf=s.reduce((a,x)=>a+x.profiles,0);
+  const totAct=s.reduce((a,x)=>a+x.active,0);
+  renderKPIs('team-kpis',[
+    {label:'Total Teams',val:n,sub:'active teams',color:'c-blue',icon:'🏢'},
+    {label:'InMails Sent',val:totInm.toLocaleString(),sub:'total outreach',color:'c-cyan',icon:'✉️'},
+    {label:'Avg Response Rate',val:avgResp.toFixed(1)+'%',sub:'across all teams',color:'c-green',icon:'💬'},
+    {label:'Profiles Viewed',val:totProf.toLocaleString(),sub:'total views',color:'c-amber',icon:'👁️'},
+    {label:'Total Active Days',val:totAct.toLocaleString(),sub:'combined activity',color:'c-violet',icon:'📅'},
+    {label:'Top Team',val:s[0]?.team||'—',sub:'by InMails sent',color:'c-red',icon:'🏆'},
+  ]);
+  const labels=s.map(x=>x.team);
+  horizBar('ch-t-inmail',labels,[{label:'InMails Sent',data:s.map(x=>x.inmails),bg:'rgba(10,102,194,.65)',bc:'rgba(10,102,194,.9)'}]);
+  horizBar('ch-t-resp',labels,[{label:'Avg Response Rate %',data:s.map(x=>parseFloat(x.resp.toFixed(1))),bg:'rgba(16,185,129,.6)',bc:'rgba(16,185,129,.85)'}]);
+  horizBar('ch-t-act',labels,[
+    {label:'Profiles Viewed',data:s.map(x=>x.profiles),bg:'rgba(245,158,11,.55)',bc:'rgba(245,158,11,.8)'},
+    {label:'Searches',data:s.map(x=>x.searches),bg:'rgba(34,211,238,.45)',bc:'rgba(34,211,238,.7)'},
+  ]);
+  document.getElementById('team-count').textContent=`${n} teams`;
+  document.getElementById('team-tbody').innerHTML=s.map(x=>`<tr>
+    <td><span class="badge-team">${x.team}</span></td>
+    <td class="mono">${x.recruiters}</td>
+    <td class="mono">${x.inmails.toLocaleString()}</td>
+    <td class="mono ${rC(x.resp)}">${x.resp.toFixed(1)}%</td>
+    <td class="mono ${rC(x.acc)}">${x.acc.toFixed(1)}%</td>
+    <td class="mono">${x.active}</td>
+    <td class="mono">${x.profiles.toLocaleString()}</td>
+    <td class="mono">${x.searches}</td>
+    <td class="mono">${x.jobs}</td>
+  </tr>`).join('');
+}
+
+/* ── PAGE: LEADS ── */
+function renderLead(){
+  const s=getLeadStats();const n=s.length;
+  if(!n){renderKPIs('lead-kpis',[{label:'No Data',val:'—',sub:'change filters',color:'c-blue',icon:'📊'}]);return;}
+  const avgAct=s.reduce((a,x)=>a+x.active,0)/n;
+  const avgProf=s.reduce((a,x)=>a+x.profiles,0)/n;
+  const avgInm=s.reduce((a,x)=>a+x.inmails,0)/n;
+  const avgAcc=s.reduce((a,x)=>a+x.acc,0)/n;
+  const topAct=[...s].sort((a,b)=>b.active-a.active)[0]?.lead.split(' ')[0]||'—';
+  renderKPIs('lead-kpis',[
+    {label:'Total Leads',val:n,sub:'active leads',color:'c-blue',icon:'👔'},
+    {label:'Avg Active Days',val:avgAct.toFixed(1),sub:'per lead',color:'c-cyan',icon:'📅'},
+    {label:'Avg Profiles Viewed',val:Math.round(avgProf),sub:'per lead',color:'c-green',icon:'👁️'},
+    {label:'Avg InMails Sent',val:Math.round(avgInm),sub:'per lead',color:'c-amber',icon:'✉️'},
+    {label:'Avg Acceptance Rate',val:avgAcc.toFixed(1)+'%',sub:'conversion avg',color:'c-violet',icon:'✅'},
+    {label:'Top by Activity',val:topAct,sub:'most active days',color:'c-red',icon:'🏆'},
+  ]);
+  const byAct=[...s].sort((a,b)=>b.active-a.active);
+  const byProf=[...s].sort((a,b)=>b.profiles-a.profiles);
+  const mxAct=byAct[0]?.active||1,mxProf=byProf[0]?.profiles||1;
+  rankList('rl-top-active',byAct.slice(0,10),'active',mxAct,false,x=>x.team);
+  rankList('rl-bot-active',byAct.slice(-10).reverse(),'active',mxAct,true,x=>x.team);
+  rankList('rl-top-profiles',byProf.slice(0,10),'profiles',mxProf,false,x=>x.team);
+  rankList('rl-bot-profiles',byProf.slice(-10).reverse(),'profiles',mxProf,true,x=>x.team);
+}
+
+/* ── PAGE: RECRUITERS ── */
+function renderRecruiter(){
+  const s=getRecStats();const n=s.length;
+  if(!n){renderKPIs('rec-kpis',[{label:'No Data',val:'—',sub:'change filters',color:'c-blue',icon:'📊'}]);return;}
+  const totInm=s.reduce((a,x)=>a+x.inmails,0);
+  const avgAcc=s.reduce((a,x)=>a+x.acc,0)/n;
+  const avgAct=s.reduce((a,x)=>a+x.active,0)/n;
+  const avgProf=s.reduce((a,x)=>a+x.profiles,0)/n;
+  const topInm=[...s].sort((a,b)=>b.inmails-a.inmails)[0]?.name.split(' ')[0]||'—';
+  renderKPIs('rec-kpis',[
+    {label:'Total Recruiters',val:n,sub:'excl. leads',color:'c-blue',icon:'🧑‍💼'},
+    {label:'Total InMails',val:totInm.toLocaleString(),sub:'combined outreach',color:'c-cyan',icon:'✉️'},
+    {label:'Avg Acceptance Rate',val:avgAcc.toFixed(1)+'%',sub:'conversion avg',color:'c-green',icon:'✅'},
+    {label:'Avg Active Days',val:avgAct.toFixed(1),sub:'per recruiter',color:'c-amber',icon:'📅'},
+    {label:'Avg Profiles Viewed',val:Math.round(avgProf),sub:'per recruiter',color:'c-violet',icon:'👁️'},
+    {label:'Top Recruiter',val:topInm,sub:'most InMails sent',color:'c-red',icon:'🏆'},
+  ]);
+  const byInm=[...s].sort((a,b)=>b.inmails-a.inmails);
+  const byAcc=[...s].sort((a,b)=>b.acc-a.acc);
+  const mxInm=byInm[0]?.inmails||1,mxAcc=byAcc[0]?.acc||1;
+  rankList('rr-top-inmail',byInm.slice(0,10),'inmails',mxInm,false,x=>`${x.team} · ${x.lead}`);
+  rankList('rr-bot-inmail',byInm.slice(-10).reverse(),'inmails',mxInm,true,x=>`${x.team} · ${x.lead}`);
+  rankList('rr-top-acc',byAcc.slice(0,10),'acc',mxAcc,false,x=>`${x.team} · ${x.lead}`,true);
+  rankList('rr-bot-acc',byAcc.slice(-10).reverse(),'acc',mxAcc,true,x=>`${x.team} · ${x.lead}`,true);
+}
+
+/* ── RANK LIST ── */
+function rankList(id,items,key,maxV,isBot,metaFn,isPct=false){
+  const el=document.getElementById(id);
+  if(!items.length){el.innerHTML='<div class="no-data">No data</div>';return;}
+  el.innerHTML=items.map((item,i)=>{
+    const rank=i+1;
+    const val=item[key]||0;
+    const disp=isPct?val.toFixed(1)+'%':val.toLocaleString();
+    const pct=maxV?Math.max(5,(val/maxV)*100):5;
+    const name=item.lead||item.name||'—';
+    const bc=isBot?'rb-b':(rank===1?'rb-1':rank===2?'rb-2':rank===3?'rb-3':'rb-n');
+    const barCls=isBot?'bar-bot':'bar-top';
+    return `<div class="rank-item">
+      <div class="rb ${bc}">${rank}</div>
+      <div class="rank-info">
+        <div class="rank-name">${name}</div>
+        <div class="rank-meta">${metaFn(item)}</div>
+      </div>
+      <div class="rank-val">${disp}</div>
+      <div class="bar-wrap"><div class="${barCls}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ── CSV EXPORT ── */
+function exportCSV(){
+  if(!filteredData.length){alert('No data to export.');return;}
+  const H=['Month','OPS','Team','Lead','Seat Holder','Jobs Posted','Active Days','Profiles Viewed','Projects Created','Searches','InMails Sent','Response Rate','Acceptance Rate','Decline Rate'];
+  const K=['month','ops','team','lead','seat_holder','jobs_posted','active_days','profiles_viewed','projects_created','searches_performed','inmails_sent','inmail_response_rate','inmail_acceptance_rate','inmail_decline_rate'];
+  const rows=[H.join(','),...filteredData.map(r=>K.map(k=>`"${r[k]??''}"`).join(','))].join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+rows],{type:'text/csv;charset=utf-8;'}));
+  const m=activeMonths.has('ALL')?'All':[...activeMonths].join('-');
+  a.download=`VBeyond_LinkedIn_${m}_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+/* ── ENTER KEY + SESSION ── */
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none')handleLogin();});
+(async()=>{const{data:{session}}=await sb.auth.getSession();if(session?.user)await boot(session.user);})();
+</script>
+</body>
+</html>
