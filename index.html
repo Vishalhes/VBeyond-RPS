@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VBeyond · Recruiter Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="login-screen">
+  <div class="login-bg"></div><div class="login-grid"></div>
+  <div class="login-card">
+    <div class="login-top-line"></div>
+    <div class="brand-row">
+      <div class="brand-mark">VB</div>
+      <div><div class="brand-name">VBeyond</div><div class="brand-sub">Recruiter Intelligence Platform</div></div>
+    </div>
+    <h2 class="login-h">Welcome back</h2>
+    <p class="login-p">Sign in to access your <strong>Recruiter Usage Report</strong></p>
+    <div class="field"><label>Email Address</label><input id="inp-email" type="email" placeholder="you@vbeyond.com" autocomplete="email"></div>
+    <div class="field"><label>Password</label><input id="inp-pass" type="password" placeholder="••••••••••" autocomplete="current-password"></div>
+    <button class="btn-primary" id="btn-login" onclick="handleLogin()">Sign In &nbsp;→</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ══════════════ PORTAL SELECTION ══════════════ -->
+<div id="portal-screen">
+  <div class="portal-bg"></div>
+  <div class="portal-grid-bg"></div>
+  <div class="portal-content">
+    <div class="portal-brand">
+      <div class="portal-brand-mark">VB</div>
+      <div><div class="portal-brand-name">VBeyond</div><div class="portal-brand-sub">Recruiter Intelligence Platform</div></div>
+    </div>
+    <div class="portal-heading">
+      <h2>Select Your Portal</h2>
+      <p>Choose a recruitment platform to view analytics &amp; performance reports</p>
+    </div>
+    <div class="portal-cards">
+      <div class="portal-card li" onclick="selectPortal('linkedin')">
+        <div class="portal-icon li-icon">in</div>
+        <div class="portal-card-name">LinkedIn</div>
+        <div class="portal-card-tag">Recruiter Lite / Premium</div>
+        <div class="portal-card-desc">InMails, active days, profiles viewed, team &amp; lead performance with monthly trends.</div>
+        <div class="portal-card-cta">Open Dashboard <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="portal-card ind" onclick="selectPortal('indeed')">
+        <div class="portal-icon ind-icon">Ind</div>
+        <div class="portal-card-name">Indeed</div>
+        <div class="portal-card-tag">Enterprise / Sponsored</div>
+        <div class="portal-card-desc">Resumes viewed, contacts used, response rates, AVP &amp; lead hierarchy with positive response tracking.</div>
+        <div class="portal-card-cta">Open Dashboard <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+    </div>
+    <div class="portal-footer">© 2026 <strong>VBeyond Corporation</strong> · All Rights Reserved · Created by <strong>Vishal Tiwari</strong></div>
+  </div>
+</div>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="dashboard-screen">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-mark">VB</div><span class="nav-name">VBeyond</span></div>
+    <div class="nav-sep"></div>
+    <span class="nav-portal-label" id="nav-portal-label">Recruiter Usage Report</span>
+    <div class="nav-spacer"></div>
+    <span class="live-dot">Live</span>
+    <div class="nav-avatar" id="nav-avatar">VB</div>
+    <div class="nav-uinfo"><div class="nav-uname" id="nav-uname">—</div><div class="nav-urole">VBeyond User</div></div>
+    <button class="btn-back" onclick="goToPortalSelection()">← Portals</button>
+    <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+  </nav>
+
+  <!-- LinkedIn Tab Bar -->
+  <div class="tab-bar" id="li-tab-bar" style="display:none">
+    <button class="tab-btn active" id="li-tab-team"      onclick="switchLIPage('team')">     <span class="tab-dot td1">T</span>Teams</button>
+    <button class="tab-btn"        id="li-tab-lead"      onclick="switchLIPage('lead')">     <span class="tab-dot td2">L</span>Leads</button>
+    <button class="tab-btn"        id="li-tab-recruiter" onclick="switchLIPage('recruiter')"><span class="tab-dot td3">R</span>Recruiters</button>
+    <button class="tab-btn"        id="li-tab-monthly"   onclick="switchLIPage('monthly')">  <span class="tab-dot td4">M</span>Monthly</button>
+  </div>
+
+  <!-- Indeed Tab Bar -->
+  <div class="tab-bar" id="in-tab-bar" style="display:none">
+    <button class="tab-btn active" id="in-tab-team"      onclick="switchINPage('team')">     <span class="tab-dot td1">T</span>Teams</button>
+    <button class="tab-btn"        id="in-tab-avp"       onclick="switchINPage('avp')">      <span class="tab-dot td5">A</span>AVP</button>
+    <button class="tab-btn"        id="in-tab-lead"      onclick="switchINPage('lead')">     <span class="tab-dot td2">L</span>Leads</button>
+    <button class="tab-btn"        id="in-tab-recruiter" onclick="switchINPage('recruiter')"><span class="tab-dot td3">R</span>Recruiters</button>
+    <button class="tab-btn"        id="in-tab-monthly"   onclick="switchINPage('monthly')">  <span class="tab-dot td4">M</span>Monthly</button>
+  </div>
+
+  <!-- Shared Filter Strip -->
+  <div class="filter-strip" id="dash-filter" style="display:none">
+    <div class="filter-bar">
+      <div class="fgrp"><span class="filter-lbl">Month</span><div class="chips" id="month-chips"></div></div>
+      <div class="fdiv"></div>
+      <div class="fgrp">
+        <span class="filter-lbl">Team</span>
+        <div class="ms-wrap">
+          <button class="ms-btn" id="ms-btn" onclick="toggleDropdown('team',event)">
+            <span id="ms-label">All Teams</span>
+            <svg class="ms-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <div class="ms-drop" id="ms-drop">
+            <div class="ms-item ms-item-all" onclick="msSelectAll('team')"><div class="ms-chk on" id="ms-all-chk">✓</div><span>All Teams</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="fdiv" id="ops-fdiv" style="display:none"></div>
+      <div class="fgrp" id="ops-fgrp" style="display:none">
+        <span class="filter-lbl">OPS</span>
+        <div class="ms-wrap">
+          <button class="ms-btn" id="ops-btn" onclick="toggleDropdown('ops',event)">
+            <span id="ops-label">All OPS</span>
+            <svg class="ms-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <div class="ms-drop" id="ops-drop">
+            <div class="ms-item ms-item-all" onclick="msSelectAll('ops')"><div class="ms-chk on" id="ops-all-chk">✓</div><span>All OPS</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-spacer"></div>
+      <button class="btn-export" onclick="exportCSV()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="dash-loading" style="display:none"><div class="spinner"></div><span class="loading-text">Loading data…</span></div>
+
+  <!-- ═══ LINKEDIN PAGES ═══ -->
+  <div id="li-dash" class="dash-scroll" style="display:none">
+
+    <div id="li-page-team" class="main">
+      <p class="sec-lbl">Team Performance Overview</p>
+      <div class="kpi-grid" id="li-team-kpis"></div>
+      <div class="chart-row col2">
+        <div class="chart-card"><div class="chart-head"><div class="chart-title">InMails Sent by Team</div><div class="chart-sub">Total outreach volume</div></div><div class="chart-wrap h350"><canvas id="li-ch-t-inmail"></canvas></div></div>
+        <div class="chart-card"><div class="chart-head"><div class="chart-title">Response Rate by Team</div><div class="chart-sub">Average InMail response rate (%)</div></div><div class="chart-wrap h350"><canvas id="li-ch-t-resp"></canvas></div></div>
+      </div>
+      <div class="chart-row col1" style="margin-bottom:20px"><div class="chart-card"><div class="chart-head"><div class="chart-title">Profiles Viewed &amp; Searches by Team</div><div class="chart-sub">Research &amp; discovery activity</div></div><div class="chart-wrap h300"><canvas id="li-ch-t-act"></canvas></div></div></div>
+      <p class="sec-lbl">All Teams Summary</p>
+      <div class="tbl-card"><div class="tbl-head"><div><div class="tbl-title">Teams Breakdown</div><div class="tbl-count" id="li-team-count">—</div></div></div><div class="tbl-scroll"><table><thead><tr><th>Team</th><th>OPS</th><th>Recruiters</th><th>InMails Sent</th><th>Response Rate</th><th>Acceptance Rate</th><th>Active Days</th><th>Profiles Viewed</th><th>Searches</th><th>Jobs Posted</th></tr></thead><tbody id="li-team-tbody"></tbody></table></div></div>
+    </div>
+
+    <div id="li-page-lead" class="main" style="display:none">
+      <p class="sec-lbl">Lead Performance Overview</p>
+      <div class="kpi-grid" id="li-lead-kpis"></div>
+      <div class="msel-wrap"><div class="msel-lbl">Rank leads by metric —</div><div class="msel" id="li-lead-msel"><button class="mtab active" onclick="setLILeadMetric('active')">📅 Active Days</button><button class="mtab" onclick="setLILeadMetric('profiles')">👁️ Profiles Viewed</button><button class="mtab" onclick="setLILeadMetric('searches')">🔍 Searches</button></div></div>
+      <div class="rank-row"><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">🏆 Top 10 <span class="badge-top">HIGHEST</span></span><span class="rank-sub-lbl" id="li-lead-lbl-top">Active Days</span></div><div id="li-rl-top"></div></div><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">📉 Bottom 10 <span class="badge-bot">LOWEST</span></span><span class="rank-sub-lbl" id="li-lead-lbl-bot">Active Days</span></div><div id="li-rl-bot"></div></div></div>
+      <p class="sec-lbl" style="margin-top:8px">All Leads — Detailed Breakdown</p>
+      <div class="tbl-card"><div class="tbl-head"><div><div class="tbl-title">Leads Summary Table</div><div class="tbl-count" id="li-lead-count">—</div></div></div><div class="tbl-scroll"><table><thead><tr><th>Lead</th><th>Team</th><th>OPS</th><th>Active Days</th><th>Profiles Viewed</th><th>Searches</th><th>InMails Sent</th><th>Response Rate</th><th>Acceptance Rate</th></tr></thead><tbody id="li-lead-tbody"></tbody></table></div><div class="show-more-row"><button class="btn-show" id="li-lead-show" onclick="toggleLILeadTable()">Show All</button></div></div>
+    </div>
+
+    <div id="li-page-recruiter" class="main" style="display:none">
+      <p class="sec-lbl">Recruiter Performance <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:.03em">(Team Leads excluded)</span></p>
+      <div class="kpi-grid" id="li-rec-kpis"></div>
+      <div class="msel-wrap"><div class="msel-lbl">Rank recruiters by metric —</div><div class="msel" id="li-rec-msel"><button class="mtab active" onclick="setLIRecMetric('inmails')">✉️ InMails Sent</button><button class="mtab" onclick="setLIRecMetric('acc')">✅ Acceptance Rate</button><button class="mtab" onclick="setLIRecMetric('active')">📅 Active Days</button><button class="mtab" onclick="setLIRecMetric('profiles')">👁️ Profiles Viewed</button><button class="mtab" onclick="setLIRecMetric('searches')">🔍 Searches</button></div></div>
+      <div class="rank-row"><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">🏆 Top 10 <span class="badge-top">HIGHEST</span></span><span class="rank-sub-lbl" id="li-rec-lbl-top">InMails Sent</span></div><div id="li-rr-top"></div></div><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">📉 Bottom 10 <span class="badge-bot">LOWEST</span></span><span class="rank-sub-lbl" id="li-rec-lbl-bot">InMails Sent</span></div><div id="li-rr-bot"></div></div></div>
+      <p class="sec-lbl" style="margin-top:8px">All Recruiters — Detailed Breakdown</p>
+      <div class="tbl-card"><div class="tbl-head"><div><div class="tbl-title">Recruiters Summary Table</div><div class="tbl-count" id="li-rec-count">—</div></div></div><div class="tbl-scroll"><table><thead><tr><th>Name</th><th>Team</th><th>OPS</th><th>Lead</th><th>Active Days</th><th>Profiles Viewed</th><th>Searches</th><th>InMails Sent</th><th>Response Rate</th><th>Acceptance Rate</th></tr></thead><tbody id="li-rec-tbody"></tbody></table></div><div class="show-more-row"><button class="btn-show" id="li-rec-show" onclick="toggleLIRecTable()">Show All</button></div></div>
+    </div>
+
+    <div id="li-page-monthly" class="main" style="display:none">
+      <p class="sec-lbl">Monthly Performance Overview</p>
+      <div class="kpi-grid" id="li-monthly-kpis"></div>
+      <div class="chart-row col1" style="margin-bottom:16px"><div class="chart-card"><div class="chart-head"><div class="chart-title">InMails Sent — Monthly Trend</div><div class="chart-sub">Outreach volume across months</div></div><div class="chart-wrap h240"><canvas id="li-ch-m-inmails"></canvas></div></div></div>
+      <div class="chart-row col3" style="margin-bottom:20px"><div class="chart-card"><div class="chart-head"><div class="chart-title">Active Days</div><div class="chart-sub">By month</div></div><div class="chart-wrap h220"><canvas id="li-ch-m-active"></canvas></div></div><div class="chart-card"><div class="chart-head"><div class="chart-title">Profiles Viewed</div><div class="chart-sub">By month</div></div><div class="chart-wrap h220"><canvas id="li-ch-m-profiles"></canvas></div></div><div class="chart-card"><div class="chart-head"><div class="chart-title">Searches Performed</div><div class="chart-sub">By month</div></div><div class="chart-wrap h220"><canvas id="li-ch-m-searches"></canvas></div></div></div>
+      <p class="sec-lbl">Monthly Data Table</p>
+      <div class="tbl-card"><div class="tbl-head"><div><div class="tbl-title">Month-wise Summary</div><div class="tbl-count" id="li-monthly-count">—</div></div></div><div class="tbl-scroll"><table><thead><tr><th>Month</th><th>InMails Sent</th><th>Active Days</th><th>Profiles Viewed</th><th>Searches</th><th>Jobs Posted</th><th>Avg Response Rate</th><th>Avg Acceptance Rate</th><th>Avg Decline Rate</th></tr></thead><tbody id="li-monthly-tbody"></tbody></table></div></div>
+    </div>
+
+    <footer class="app-footer">© 2026 <strong>VBeyond Corporation</strong> · All Rights Reserved · Created by <strong>Vishal Tiwari</strong></footer>
+  </div>
+
+  <!-- ═══ INDEED PAGES ═══ -->
+  <div id="in-dash" class="dash-scroll" style="display:none">
+
+    <div id="in-page-team" class="main">
+      <p class="sec-lbl">Team Performance Overview</p>
+      <div class="kpi-grid" id="in-team-kpis"></div>
+      <div class="chart-row col2">
+        <div class="chart-card"><div class="chart-head"><div class="chart-title">Resumes Viewed by Team</div><div class="chart-sub">Total research activity</div></div><div class="chart-wrap h350"><canvas id="in-ch-t-resumes"></canvas></div></div>
+        <div class="chart-card"><div class="chart-head"><div class="chart-title">Contacts Used by Team</div><div class="chart-sub">Total outreach volume</div></div><div class="chart-wrap h350"><canvas id="in-ch-t-contacts"></canvas></div></div>
+      </div>
+      <div class="chart-row col1" style="margin-bottom:20px"><div class="chart-card"><div class="chart-head"><div class="chart-title">Response Rate by Team</div><div class="chart-sub">Average response rate (%)</div></div><div class="chart-wrap h300"><canvas id="in-ch-t-resp"></canvas></div></div></div>
+      <p class="sec-lbl">All Teams Summary</p>
+      <div class="tbl-card"><div class="tbl-head"><div><div class="tbl-title">Teams Breakdown</div><div class="tbl-count" id="in-team-count">—</div></div></div><div class="tbl-scroll"><table><thead><tr><th>Team</th><th>AVPs</th><th>Leads</th><th>Recruiters</th><th>Searches</th><th>Resumes Viewed</th><th>Contacts Used</th><th>Response Rate</th><th>Positive Response Rate</th></tr></thead><tbody id="in-team-tbody"></tbody></table></div></div>
+    </div>
+
+    <div id="in-page-avp" class="main" style="display:none">
+      <p class="sec-lbl">AVP Performance <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:.03em">(Assistant Vice Presidents)</span></p>
+      <div class="kpi-grid" id="in-avp-kpis"></div>
+      <div class="msel-wrap"><div class="msel-lbl">Rank AVPs by metric —</div><div class="msel" id="in-avp-msel"><button class="mtab active" onclick="setINAvpMetric('resumes')">📄 Resumes Viewed</button><button class="mtab" onclick="setINAvpMetric('searches')">🔍 Searches</button><button class="mtab" onclick="setINAvpMetric('contacts')">📬 Contacts Used</button><button class="mtab" onclick="setINAvpMetric('resp')">💬 Response Rate</button><button class="mtab" onclick="setINAvpMetric('pos')">✅ Positive Response</button></div></div>
+      <div class="rank-row"><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">🏆 Top 10 <span class="badge-top">HIGHEST</span></span><span class="rank-sub-lbl" id="in-avp-lbl-top">Resumes Viewed</span></div><div id="in-avp-top"></div></div><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">📉 Bottom 10 <span class="badge-bot">LOWEST</span></span><span class="rank-sub-lbl" id="in-avp-lbl-bot">Resumes Viewed</span></div><div id="in-avp-bot"></div></div></div>
+      <p class="sec-lbl" style="margin-top:8px">All AVPs — Detailed Breakdown</p>
+      <div class="tbl-card"><div class="tbl-head"><div><div class="tbl-title">AVP Summary Table</div><div class="tbl-count" id="in-avp-count">—</div></div></div><div class="tbl-scroll"><table><thead><tr><th>AVP</th><th>Team</th><th>Leads</th><th>Recruiters</th><th>Searches</th><th>Resumes Viewed</th><th>Contacts Used</th><th>Response Rate</th><th>Positive Response Rate</th></tr></thead><tbody id="in-avp-tbody"></tbody></table></div><div class="show-more-row"><button class="btn-show" id="in-avp-show" onclick="toggleINAvpTable()">Show All</button></div></div>
+    </div>
+
+    <div id="in-page-lead" class="main" style="display:none">
+      <p class="sec-lbl">Lead Performance <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:.03em">(AVPs excluded)</span></p>
+      <div class="kpi-grid" id="in-lead-kpis"></div>
+      <div class="msel-wrap"><div class="msel-lbl">Rank leads by metric —</div><div class="msel" id="in-lead-msel"><button class="mtab active" onclick="setINLeadMetric('resumes')">📄 Resumes Viewed</button><button class="mtab" onclick="setINLeadMetric('searches')">🔍 Searches</button><button class="mtab" onclick="setINLeadMetric('contacts')">📬 Contacts Used</button><button class="mtab" onclick="setINLeadMetric('resp')">💬 Response Rate</button><button class="mtab" onclick="setINLeadMetric('pos')">✅ Positive Response</button></div></div>
+      <div class="rank-row"><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">🏆 Top 10 <span class="badge-top">HIGHEST</span></span><span class="rank-sub-lbl" id="in-lead-lbl-top">Resumes Viewed</span></div><div id="in-lead-top"></div></div><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">📉 Bottom 10 <span class="badge-bot">LOWEST</span></span><span class="rank-sub-lbl" id="in-lead-lbl-bot">Resumes Viewed</span></div><div id="in-lead-bot"></div></div></div>
+      <p class="sec-lbl" style="margin-top:8px">All Leads — Detailed Breakdown</p>
+      <div class="tbl-card"><div class="tbl-head"><div><div class="tbl-title">Leads Summary Table</div><div class="tbl-count" id="in-lead-count">—</div></div></div><div class="tbl-scroll"><table><thead><tr><th>Lead</th><th>Team</th><th>AVP</th><th>Searches</th><th>Resumes Viewed</th><th>Contacts Used</th><th>Response Rate</th><th>Positive Response Rate</th></tr></thead><tbody id="in-lead-tbody"></tbody></table></div><div class="show-more-row"><button class="btn-show" id="in-lead-show" onclick="toggleINLeadTable()">Show All</button></div></div>
+    </div>
+
+    <div id="in-page-recruiter" class="main" style="display:none">
+      <p class="sec-lbl">Recruiter Performance <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:.03em">(AVPs &amp; Leads excluded)</span></p>
+      <div class="kpi-grid" id="in-rec-kpis"></div>
+      <div class="msel-wrap"><div class="msel-lbl">Rank recruiters by metric —</div><div class="msel" id="in-rec-msel"><button class="mtab active" onclick="setINRecMetric('resumes')">📄 Resumes Viewed</button><button class="mtab" onclick="setINRecMetric('searches')">🔍 Searches</button><button class="mtab" onclick="setINRecMetric('contacts')">📬 Contacts Used</button><button class="mtab" onclick="setINRecMetric('resp')">💬 Response Rate</button><button class="mtab" onclick="setINRecMetric('pos')">✅ Positive Response</button></div></div>
+      <div class="rank-row"><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">🏆 Top 10 <span class="badge-top">HIGHEST</span></span><span class="rank-sub-lbl" id="in-rec-lbl-top">Resumes Viewed</span></div><div id="in-rec-top"></div></div><div class="rank-card"><div class="rank-card-head"><span class="rank-card-title">📉 Bottom 10 <span class="badge-bot">LOWEST</span></span><span class="rank-sub-lbl" id="in-rec-lbl-bot">Resumes Viewed</span></div><div id="in-rec-bot"></div></div></div>
+      <p class="sec-lbl" style="margin-top:8px">All Recruiters — Detailed Breakdown</p>
+      <div class="tbl-card"><div class="tbl-head"><div><div class="tbl-title">Recruiters Summary Table</div><div class="tbl-count" id="in-rec-count">—</div></div></div><div class="tbl-scroll"><table><thead><tr><th>Name</th><th>Team</th><th>AVP</th><th>Lead</th><th>Searches</th><th>Resumes Viewed</th><th>Contacts Used</th><th>Response Rate</th><th>Positive Response Rate</th></tr></thead><tbody id="in-rec-tbody"></tbody></table></div><div class="show-more-row"><button class="btn-show" id="in-rec-show" onclick="toggleINRecTable()">Show All</button></div></div>
+    </div>
+
+    <div id="in-page-monthly" class="main" style="display:none">
+      <p class="sec-lbl">Monthly Performance Overview</p>
+      <div class="kpi-grid" id="in-monthly-kpis"></div>
+      <div class="chart-row col1" style="margin-bottom:16px"><div class="chart-card"><div class="chart-head"><div class="chart-title">Resumes Viewed — Monthly Trend</div><div class="chart-sub">Research activity across months</div></div><div class="chart-wrap h240"><canvas id="in-ch-m-resumes"></canvas></div></div></div>
+      <div class="chart-row col2" style="margin-bottom:20px"><div class="chart-card"><div class="chart-head"><div class="chart-title">Searches Performed</div><div class="chart-sub">By month</div></div><div class="chart-wrap h220"><canvas id="in-ch-m-searches"></canvas></div></div><div class="chart-card"><div class="chart-head"><div class="chart-title">Contacts Used</div><div class="chart-sub">By month</div></div><div class="chart-wrap h220"><canvas id="in-ch-m-contacts"></canvas></div></div></div>
+      <p class="sec-lbl">Monthly Data Table</p>
+      <div class="tbl-card"><div class="tbl-head"><div><div class="tbl-title">Month-wise Summary</div><div class="tbl-count" id="in-monthly-count">—</div></div></div><div class="tbl-scroll"><table><thead><tr><th>Month</th><th>Searches</th><th>Resumes Viewed</th><th>Contacts Used</th><th>Responses</th><th>Positive Responses</th><th>Response Rate</th><th>Positive Response Rate</th></tr></thead><tbody id="in-monthly-tbody"></tbody></table></div></div>
+    </div>
+
+    <footer class="app-footer">© 2026 <strong>VBeyond Corporation</strong> · All Rights Reserved · Created by <strong>Vishal Tiwari</strong></footer>
+  </div>
+
+</div><!-- /dashboard-screen -->
+
+<!-- Timeout Banner -->
+<div id="timeout-banner">⏱ Session expiring in 2 min due to inactivity</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
